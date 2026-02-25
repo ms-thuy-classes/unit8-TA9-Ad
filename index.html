@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tourism Quiz – Unit 8 Grade 9</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #a8edea;
+    --rose: #fed6e3;
+    --peach: #ffd3a5;
+    --lavender: #c2a6f8;
+    --mint: #b5f0c9;
+    --yellow: #fff3a3;
+    --coral: #ff8c69;
+    --teal: #5ec8c8;
+    --purple: #9b59d0;
+    --card: rgba(255, 255, 255, 0.94);
+    --shadow: 0 12px 50px rgba(0,0,0,0.3);
+    --radius: 26px;
+    --font: 'Nunito', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: url('https://giffiles.alphacoders.com/180/1808.gif') no-repeat center center fixed;
+    background-size: cover;
+    font-family: var(--font);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: -1;
+  }
+
+  /* SCREENS */
+  .screen { display: none; position: relative; z-index: 10; width: 100%; max-width: 720px; padding: 16px; }
+  .screen.active { display: block; animation: fadeSlideIn 0.45s ease both; }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    padding: 35px;
+    box-shadow: var(--shadow);
+    border: 2px solid rgba(255,255,255,0.8);
+  }
+
+  /* START SCREEN */
+  .brand { text-align: center; margin-bottom: 26px; }
+  .brand-emoji { font-size: 3.5rem; display: block; animation: bounce 2.2s ease infinite; }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  .brand-title {
+    font-family: 'Pacifico', cursive; font-size: 2.2rem;
+    background: linear-gradient(90deg, #9b59d0, #ff8c69);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-top: 8px;
+  }
+  .info-pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 26px; }
+  .pill {
+    background: white; border: 1.5px solid var(--purple);
+    border-radius: 50px; padding: 6px 14px;
+    font-size: 0.8rem; font-weight: 800; color: var(--purple);
+  }
+
+  .input-wrap { margin-bottom: 22px; }
+  .input-wrap label { display: block; font-weight: 800; color: #444; margin-bottom: 8px; }
+  .input-wrap input {
+    width: 100%; padding: 14px 18px; border: 2px solid #ddd;
+    border-radius: 14px; font-family: var(--font); font-size: 1rem; font-weight: 700;
+  }
+
+  .btn-start {
+    width: 100%; padding: 16px; background: linear-gradient(135deg, #9b59d0, #5ec8c8);
+    border: none; border-radius: 16px; color: white; font-size: 1.1rem; font-weight: 900;
+    cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.2); transition: 0.2s;
+  }
+  .btn-start:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+  /* QUIZ HEADER */
+  .quiz-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .q-num { background: var(--purple); color: white; border-radius: 10px; padding: 5px 12px; font-weight: 900; font-size: 0.85rem; }
+  .progress-bar-wrap { flex: 1; background: #eee; border-radius: 50px; height: 10px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--purple), var(--teal)); width: 0%; transition: 0.4s; }
+  .timer-num { font-weight: 900; color: #e55a2b; min-width: 30px; text-align: center; }
+
+  /* QUESTION AREA */
+  .q-text { font-size: 1.1rem; font-weight: 700; color: #222; margin-bottom: 20px; line-height: 1.5; }
+  .options-grid { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    width: 100%; padding: 14px 18px; background: #fff; border: 2px solid #eee;
+    border-radius: 14px; font-family: var(--font); font-size: 1rem; font-weight: 700;
+    text-align: left; cursor: pointer; transition: 0.2s;
+  }
+  .option-btn:hover { border-color: var(--purple); background: #fdf8ff; transform: translateX(5px); }
+
+  /* FEEDBACK OVERLAY */
+  .feedback-overlay {
+    position: fixed; inset: 0; z-index: 999; display: flex; align-items: center;
+    justify-content: center; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: 0.3s;
+  }
+  .feedback-overlay.show { opacity: 1; }
+  .feedback-box {
+    background: white; padding: 25px; border-radius: 25px; text-align: center;
+    transform: scale(0.7); transition: 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .feedback-overlay.show .feedback-box { transform: scale(1); }
+  .feedback-gif { width: 140px; height: 140px; border-radius: 20px; object-fit: cover; margin-bottom: 15px; border: 3px solid #f0f0f0; }
+  .feedback-text { font-size: 1.4rem; font-weight: 900; }
+
+  /* RESULT SCREEN */
+  .score-big { background: #f8f0ff; border-radius: 20px; padding: 30px; text-align: center; margin: 20px 0; }
+  .score-fraction { font-size: 3.5rem; font-weight: 900; color: var(--purple); line-height: 1; }
+  .score-grade { font-size: 1.8rem; font-weight: 900; color: var(--coral); margin-top: 10px; }
+
+  @media (max-width: 500px) { .card { padding: 25px 15px; } }
+</style>
+</head>
+<body>
+
+<div class="screen active" id="startScreen">
+  <div class="card">
+    <div class="brand">
+      <span class="brand-emoji">✈️</span>
+      <div class="brand-title">Tourism Quiz</div>
+      <div style="font-weight:800; color:#666">Unit 8 - Grade 9 Global Success</div>
+    </div>
+    <div class="info-pills">
+      <span class="pill">📝 40 Câu hỏi</span>
+      <span class="pill">⏱ 20-25 Giây</span>
+      <span class="pill">🏆 Thang điểm 10</span>
+    </div>
+    <div class="input-wrap">
+      <label>👤 Nhập tên của bạn để lưu danh:</label>
+      <input type="text" id="studentName" placeholder="Ví dụ: Nguyễn Văn A..." maxlength="30" />
+    </div>
+    <button class="btn-start" onclick="startQuiz()">🚀 BẮT ĐẦU LÀM BÀI</button>
+  </div>
+</div>
+
+<div class="screen" id="quizScreen">
+  <div class="card">
+    <div id="quizName" style="text-align:center; font-weight:900; color:var(--purple); margin-bottom:10px"></div>
+    <div class="quiz-header">
+      <div class="q-num" id="qNum">Câu 1</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="timer-num" id="timerNum">20</div>
+    </div>
+    <div id="questionArea"></div>
+  </div>
+</div>
+
+<div class="screen" id="resultScreen">
+  <div class="card">
+    <div class="brand">
+      <span style="font-size:4rem">🎖️</span>
+      <div class="brand-title">Kết Quả</div>
+      <div id="resName" style="font-weight:900; font-size:1.2rem; color:#444"></div>
+    </div>
+    <div class="score-big">
+      <div class="score-fraction" id="scoreFraction">0/40</div>
+      <div class="score-grade" id="scoreGrade">0.0</div>
+    </div>
+    <div id="resMsg" style="text-align:center; font-weight:700; margin-bottom:20px; color:#666; line-height:1.4"></div>
+    <button class="btn-start" onclick="location.reload()">🔄 LÀM LẠI BÀI TẬP</button>
+  </div>
+</div>
+
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-box">
+    <img src="" id="feedbackGif" class="feedback-gif" alt="feedback">
+    <div class="feedback-text" id="feedbackText"></div>
+  </div>
+</div>
+
+<audio id="sndCorrect" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+<audio id="sndWrong" src="https://assets.mixkit.co/active_storage/sfx/2959/2959-preview.mp3"></audio>
+
+<script>
+// ═══════════════════════════════════════════════
+// MẢNG DỮ LIỆU ĐẦY ĐỦ 40 CÂU HỎI
+// ═══════════════════════════════════════════════
+const QUESTIONS = [
+  // ── PHONETICS ──
+  {q: 'Chọn từ có phần gạch chân đọc <b>KHÁC</b> với ba từ còn lại:<br>A. p<u>a</u>ckage &nbsp; B. tr<u>a</u>vel &nbsp; C. pl<u>a</u>tform &nbsp; D. b<u>a</u>sic', options: ['A. package', 'B. travel', 'C. platform', 'D. basic'], a: 3, time: 20},
+  {q: 'Chọn từ có phần gạch chân đọc <b>KHÁC</b> với ba từ còn lại:<br>A. t<u>ou</u>rism &nbsp; B. s<u>ou</u>venir &nbsp; C. thr<u>ou</u>ghout &nbsp; D. y<u>ou</u>thful', options: ['A. tourism ', 'B. souvenir ', 'C. throughout ', 'D. youthful '], a: 0, time: 20},
+  
+  // ── STRESS ──
+  {q: 'Chọn từ có trọng âm <b>KHÁC</b> với ba từ còn lại:<br>A. academic &nbsp; B. fantastic &nbsp; C. electric &nbsp; D. heroic', options: ['A. academic', 'B. fantastic', 'C. electric', 'D. heroic'], a: 0, time: 20},
+  {q: 'Chọn từ có trọng âm <b>KHÁC</b> với ba từ còn lại:<br>A. ruinous &nbsp; B. classic &nbsp; C. ideal &nbsp; D. local', options: ['A. ruinous', 'B. classic', 'C. ideal', 'D. local'], a: 2, time: 20},
+  
+  // ── VOCABULARY & GRAMMAR ──
+  {q: 'Your trip can go _______ if you have a tour guide to take care of your tour.', options: ['A. smooth', 'B. well', 'C. smoothly', 'D. quickly'], a: 2, time: 25},
+  {q: 'The seaside resort always gets overcrowded in _______ season.', options: ['A. off', 'B. peak', 'C. low', 'D. hard'], a: 1, time: 25},
+  {q: 'Staying at a _______ allowed us to immerse ourselves in the local culture.', options: ['A. hotel', 'B. homestay', 'C. motel', 'D. remote place'], a: 1, time: 25},
+  {q: 'We will set off _______ so that when we arrive at the resort, it hasn\'t been too sunny.', options: ['A. from dawn to dusk', 'B. at the dusk', 'C. at the crack of dawn', 'D. at the sun set'], a: 2, time: 25},
+  {q: 'The village in the valley was truly _______, with its charming cottages and meandering river.', options: ['A. lively', 'B. smooth', 'C. exciting', 'D. picturesque'], a: 3, time: 25},
+  {q: 'Ha Long Bay has twice been _______ by UNESCO as a World Natural Heritage Site.', options: ['A. developed', 'B. experienced', 'C. recognized', 'D. discovered'], a: 2, time: 25},
+  {q: 'The seafront was very _______, with lots of souvenir shops and crowds of visitors.', options: ['A. ruinous', 'B. crowded', 'C. touristy', 'D. exciting'], a: 2, time: 25},
+  {q: 'The restaurant is likely to be busy, so you should definitely _______ online.', options: ['A. make a reservation', 'B. call travel agency', 'C. have package holiday', 'D. book a safari'], a: 0, time: 25},
+  {q: 'I try to avoid the _______ of shopping centres so I chose to explore a province by the sea.', options: ['A. hustle and bustle', 'B. far and wide', 'C. ups and downs', 'D. part and parcel'], a: 0, time: 25},
+  {q: 'Thailand promotes _______ tourism by holding festivals to showcase authentic Thai dishes.', options: ['A. shopping', 'B. culture', 'C. sports', 'D. food'], a: 3, time: 25},
+  {q: 'We _______ how much our trip would cost, then we saved money for the trip.', options: ['A. thought', 'B. suspected', 'C. estimated', 'D. got'], a: 2, time: 25},
+  {q: 'The _______ adventure offered an unforgettable experience as we travelled the vast wilderness.', options: ['A. wildlife', 'B. package holiday', 'C. homestay', 'D. safari'], a: 3, time: 25},
+  {q: 'The tour operator will arrange transport and plan your _______; thus the route is provided in advance.', options: ['A. destination', 'B. ticket', 'C. stay', 'D. itinerary'], a: 3, time: 25},
+  {q: 'Our _______ showed us around the old town and regaled us with historical stories.', options: ['A. tour guide', 'B. travel agent', 'C. holidaymaker', 'D. sightseer'], a: 0, time: 25},
+  {q: 'To go on a(n) _______ is to take a trip to see or hunt wild animals, especially in Africa.', options: ['A. picnic', 'B. safari', 'C. excursion', 'D. travel'], a: 1, time: 25},
+  {q: '_______ is travelling from one region, country, or state to participate in a sports activity.', options: ['A. Domestic tourism', 'B. Local travelling', 'C. Ecotourism', 'D. Sports tourism'], a: 3, time: 25},
+  {q: 'Traveling in Kuala Lumpur is very convenient, and the _______ of transportation is cheap.', options: ['A. ticket', 'B. cost', 'C. season', 'D. offer'], a: 1, time: 25},
+  {q: 'The chalet was in a _______ area, with no public transport or shops nearby.', options: ['A. city', 'B. central', 'C. urban', 'D. remote'], a: 3, time: 25},
+  {q: 'I prefer to go to _______ places to enjoy tranquillity rather than to a noisy place.', options: ['A. central', 'B. on the beaten track', 'C. urban', 'D. off the beaten track'], a: 3, time: 25},
+  {q: 'We visited the local _______ to admire the handmade jewellery and pottery on display.', options: ['A. village', 'B. craft fair', 'C. market', 'D. supermarket'], a: 1, time: 25},
+  
+  // ── RELATIVE CLAUSES ──
+  {q: 'Canada Sports tourism, _______ helps develop the economy substantially, has a number of objectives.', options: ['A. which', 'B. that', 'C. who', 'D. where'], a: 0, time: 25},
+  {q: 'The travel agency _______ provided us with the tours gave us a small discount.', options: ['A. whose', 'B. who', 'C. which', 'D. what'], a: 2, time: 25},
+  {q: '_______ is so convenient for visitors is that people can use online apps to book tickets.', options: ['A. What', 'B. That', 'C. Which', 'D. Who'], a: 0, time: 25},
+  {q: 'The guide _______ led this guided tour was very knowledgeable about local history.', options: ['A. which', 'B. whom', 'C. who', 'D. whose'], a: 2, time: 25},
+  {q: 'The culinary tour _______ included tastings of local specialities was the highlight of our trip.', options: ['A. who', 'B. whose', 'C. whom', 'D. which'], a: 3, time: 25},
+  {q: 'Amy wants to get on that scenic train _______ crosses through the landscape of Switzerland.', options: ['A. who', 'B. that', 'C. whom', 'D. whose'], a: 1, time: 25},
+  {q: 'The cruise ship, _______ amenities include a rooftop pool and fine dining, is a favourite.', options: ['A. which', 'B. that', 'C. who', 'D. whose'], a: 3, time: 25},
+  {q: 'The hotel staff, __________ helped us, were exceptionally friendly and helpful.', options: ['A. who', 'B. which', 'C. whom', 'D. whose'], a: 0, time: 25},
+  {q: 'Visitors _______ come to Kyoto are usually impressed by its temples and gardens.', options: ['A. which', 'B. who', 'C. whom', 'D. whose'], a: 1, time: 25},
+  {q: 'The British Museum has many ancient relics _______ span several millennia of human history.', options: ['A. which', 'B. whom', 'C. who', 'D. whose'], a: 0, time: 25},
+  {q: 'Passengers _______ flights were delayed were offered free accommodation for the night.', options: ['A. whose', 'B. who', 'C. whom', 'D. which'], a: 0, time: 25},
+  {q: 'We stayed at a charming little hotel _______ balcony overlooked a beautiful beach.', options: ['A. which', 'B. that', 'C. whose', 'D. where'], a: 2, time: 25},
+  {q: 'We visited a national park _______ is home to a variety of endangered species.', options: ['A. who', 'B. which', 'C. whose', 'D. where'], a: 1, time: 25},
+  {q: 'The famous beaches in Thailand, _______ many tourists flock to, offer stunning views.', options: ['A. where', 'B. which', 'C. whose', 'D. who'], a: 1, time: 25},
+  {q: 'I feel satisfied because this is the most amazing trip _______ I\'ve ever taken.', options: ['A. where', 'B. when', 'C. that', 'D. which'], a: 2, time: 25},
+  {q: 'Sustainable tourism practices are important to protect the environment, _______ benefits local communities as well.', options: ['A. which', 'B. who', 'C. whose', 'D. that'], a: 0, time: 25}
+];
+
+let cur = 0, score = 0, timer = null, timeLeft = 0, name = "";
+const GIF_OK = "https://media.tenor.com/nEGbMEcc8rEAAAAM/ch%C3%ADnh-x%C3%A1c-ch%E1%BB%89tay.gif";
+const GIF_NO = "https://media.tenor.com/SOpq6MaKCqEAAAAM/c%E1%BA%ADu-sai-r%E1%BB%93i-sai.gif";
+
+// Hàm xáo trộn mảng (Fisher-Yates)
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function startQuiz() {
+  name = document.getElementById('studentName').value.trim() || "Thí sinh";
+  
+  // Xáo trộn câu hỏi trước khi bắt đầu lượt chơi mới
+  shuffleArray(QUESTIONS);
+  // Reset trạng thái
+  cur = 0;
+  score = 0;
+
+  document.getElementById('quizName').innerText = "👤 Học sinh: " + name;
+  document.getElementById('startScreen').classList.remove('active');
+  document.getElementById('quizScreen').classList.add('active');
+  showQ();
+}
+
+function showQ() {
+  if(cur >= QUESTIONS.length) return finish();
+  const d = QUESTIONS[cur];
+  document.getElementById('qNum').innerText = `Câu ${cur + 1} / ${QUESTIONS.length}`;
+  document.getElementById('progressBar').style.width = (cur / QUESTIONS.length * 100) + "%";
+  
+  let h = `<div class="q-text">${d.q}</div><div class="options-grid">`;
+  d.options.forEach((o, i) => h += `<button class="option-btn" onclick="check(${i})">${o}</button>`);
+  document.getElementById('questionArea').innerHTML = h + `</div>`;
+  
+  timeLeft = d.time; updateT();
+  clearInterval(timer);
+  timer = setInterval(() => { timeLeft--; updateT(); if(timeLeft <= 0) { clearInterval(timer); check(-1); } }, 1000);
+}
+
+function updateT() { document.getElementById('timerNum').innerText = timeLeft; }
+
+function check(i) {
+  clearInterval(timer);
+  const correct = i === QUESTIONS[cur].a;
+  if(correct) { score++; document.getElementById('sndCorrect').play(); } 
+  else document.getElementById('sndWrong').play();
+  
+  showF(correct);
+  setTimeout(() => { cur++; showQ(); }, 1800);
+}
+
+function showF(is) {
+  const o = document.getElementById('feedbackOverlay');
+  document.getElementById('feedbackGif').src = is ? GIF_OK : GIF_NO;
+  document.getElementById('feedbackText').innerText = is ? "CHÍNH XÁC!" : "SAI RỒI!";
+  document.getElementById('feedbackText').style.color = is ? "#2ecc71" : "#e74c3c";
+  o.classList.add('show');
+  setTimeout(() => o.classList.remove('show'), 1600);
+}
+
+function finish() {
+  document.getElementById('quizScreen').classList.remove('active');
+  document.getElementById('resultScreen').classList.add('active');
+  document.getElementById('resName').innerText = name;
+  document.getElementById('scoreFraction').innerText = `${score} / ${QUESTIONS.length}`;
+  const g = (score / QUESTIONS.length * 10).toFixed(1);
+  document.getElementById('scoreGrade').innerText = `${g} Điểm`;
+  
+  let m = "";
+  if(g >= 9) m = "Tuyệt vời! Bạn là thiên tài du lịch! 🌟";
+  else if(g >= 7) m = "Rất tốt! Hãy tiếp tục phát huy nhé! 👍";
+  else if(g >= 5) m = "Tạm ổn, bạn cần chú ý hơn về mạo từ và từ vựng! 📚";
+  else m = "Cố gắng lên! Hãy ôn tập lại Unit 8 kỹ hơn nhé! 💪";
+  document.getElementById('resMsg').innerText = m;
+}
+</script>
+</body>
+</html>
